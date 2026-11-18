@@ -260,12 +260,23 @@ tern/
 
 ## 🗺️ Roadmap
 
-- [ ] **v0.1:** bitnet.cpp running behind an OpenAI-compatible local server (CLI only)
-- [ ] **v0.2:** Tauri app with chat, model download, and hardware detection
-- [ ] **v0.3:** Settings panel (sampling, threads, kernels) and the power dial
-- [ ] **v0.4:** Built-in benchmark with tokens/sec and energy readout
-- [ ] **v0.5:** Engine interface finalized, llama.cpp adapter, plugin API
-- [ ] **v1.0:** Signed installers for all three platforms, stable API, docs
+### v0.x: Pre-alpha (now)
+- [x] Project scaffold, licensing, governance, CI
+- [ ] Ternary weight format spec (`spec/`)
+- [ ] Scalar reference implementation that loads a model and generates text
+
+### v1.0: CPU engine
+- [ ] Packed-weight CPU kernels (AVX2, AVX-512, ARM NEON)
+- [ ] Paged KV cache and continuous batching
+- [ ] OpenAI-compatible server (`/v1/chat/completions`)
+- [ ] Benchmarks versus llama.cpp on identical hardware
+
+### v2.0: Beta: Anthropic API and CUDA
+- [ ] Anthropic Messages API compatibility (`/v1/messages`)
+- [ ] Streaming in Anthropic's event format
+- [ ] CUDA backend (int8 and ternary kernels)
+- [ ] Quantized KV cache (int8)
+- [ ] Multi-GPU tensor parallelism
 
 ---
 
