@@ -1,0 +1,38 @@
+# Tern Configuration File
+# Copy this to config.toml and customize
+
+[api]
+bind_address = "127.0.0.1"
+port = 8080
+api_key = ""  # Optional: set to enable API key authentication
+cors = true
+timeout_seconds = 300
+max_concurrent_requests = 100
+
+[model]
+cache_dir = "./models"
+default_model = "bitnet-b1.58-2b-4t"
+
+[inference]
+threads = 0  # 0 = auto-detect
+context_length = 4096
+batch_size = 1
+temperature = 0.7
+top_p = 0.9
+top_k = 50
+min_p = 0.0
+repetition_penalty = 1.1
+seed = 0  # 0 = random
+flash_attention = false
+
+[engine]
+name = "ternary"  # Options: "ternary", "bitnet", "llamacpp"
+kernel = "I2_S"   # For bitnet: I2_S, TL1, TL2
+
+[hardware]
+cpu_affinity = []  # Empty = all cores
+power_limit_watts = 0  # 0 = no limit
+
+[logging]
+level = "info"  # trace, debug, info, warn, error
+format = "text" # text, json

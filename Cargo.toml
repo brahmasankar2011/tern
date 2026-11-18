@@ -1,0 +1,60 @@
+[workspace]
+resolver = "2"
+members = [
+    "core",
+    "api",
+    "bench",
+    "engines/bitnet",
+    "engines/llamacpp",
+]
+
+[workspace.dependencies]
+# Core dependencies
+anyhow = "1.0"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap = { version = "4.0", features = ["derive", "env"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# Tensor/ML dependencies
+ndarray = "0.16"
+num-traits = "0.2"
+half = "2.0"
+
+# Hardware detection
+sysinfo = "0.30"
+
+# Model loading
+safetensors = "0.5"
+hf-hub = { version = "0.3", features = ["async"] }
+tokenizers = "0.15"
+
+# API server
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# Benchmarking
+criterion = "0.5"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/brahmasankar2011/tern"
+description = "Ternary LLM inference application"
+authors = ["brahmasankar2011"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+debug = true

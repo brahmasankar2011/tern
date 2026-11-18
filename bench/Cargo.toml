@@ -1,0 +1,16 @@
+[package]
+name = "tern-bench"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+description = "Benchmark harness for Ternary LLM inference"
+repository = { workspace = true }
+
+[dependencies]
+tern-core = { path = "../core" }
+criterion = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+clap = { workspace = true }

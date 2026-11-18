@@ -1,0 +1,119 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: tern-linux
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: tern-windows.exe
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: tern-macos
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: tern-macos-arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install cross-compilation tools
+        if: matrix.os == 'ubuntu-latest' && matrix.target != 'x86_64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Build release
+        run: cargo build --workspace --release --all-features --target ${{ matrix.target }}
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p release/${{ matrix.artifact }}/bin
+          cp target/${{ matrix.target }}/release/tern release/${{ matrix.artifact }}/bin/
+          cp target/${{ matrix.target }}/release/tern-api release/${{ matrix.artifact }}/bin/ 2>/dev/null || true
+          cp target/${{ matrix.target }}/release/tern-bench release/${{ matrix.artifact }}/bin/ 2>/dev/null || true
+          cp README.md release/${{ matrix.artifact }}/
+          cp LICENSE release/${{ matrix.artifact }}/
+          cp config.example.toml release/${{ matrix.artifact }}/config.toml
+
+      - name: Create archive
+        run: |
+          cd release
+          tar -czf ${{ matrix.artifact }}.tar.gz ${{ matrix.artifact }}
+          sha256sum ${{ matrix.artifact }}.tar.gz > ${{ matrix.artifact }}.tar.gz.sha256
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            release/${{ matrix.artifact }}.tar.gz
+            release/${{ matrix.artifact }}.tar.gz.sha256
+          retention-days: 30
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release notes
+        run: |
+          TAG=${{ github.ref_name }}
+          cat > release_notes.md <<EOF
+          # Tern ${{ github.ref_name }}
+
+          ## Changes
+          See [CHANGELOG.md](CHANGELOG.md) for details.
+
+          ## Downloads
+          | Platform | File | SHA256 |
+          |----------|------|--------|
+          EOF
+
+          for f in artifacts/*/*.tar.gz; do
+            name=$(basename "$f" .tar.gz)
+            sha=$(cat "artifacts/${name}/${name}.tar.gz.sha256" | cut -d' ' -f1)
+            echo "| $name | [$name.tar.gz]($f) | $sha |" >> release_notes.md
+          done
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Tern ${{ github.ref_name }}
+          body_path: release_notes.md
+          files: |
+            artifacts/*/*.tar.gz
+            artifacts/*/*.tar.gz.sha256
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
