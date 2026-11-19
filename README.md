@@ -14,7 +14,7 @@ Easy to use. Full control. No accounts, no telemetry, no vendor lock-in.
 
 </div>
 
-> **Note:** Tern is in pre-alpha. This README describes the project's goals and design. Items marked ✅ exist, items marked 🚧 are in progress, and items marked 🗓️ are planned. Rename the project and update the badges and links before publishing.
+> **Note:** Tern is in pre-alpha. This README describes the project's goals and design. Items marked ✅ exist, items marked 🚧 are in progress, and items marked 🗓️ are planned.
 
 ---
 
